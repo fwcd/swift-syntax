@@ -115,22 +115,7 @@ let buildableCollectionNodesFile = SourceFile {
         modifiers: [TokenSyntax.public],
         identifier: .identifier("build\(type.baseName)"),
         signature: FunctionSignature(
-          input: ParameterClause(
-            parameterList: [
-              FunctionParameter(
-                firstName: .identifier("format"),
-                colon: .colon,
-                type: "Format",
-                trailingComma: .comma
-              ),
-              FunctionParameter(
-                firstName: .identifier("leadingTrivia"),
-                colon: .colon,
-                type: OptionalType(wrappedType: "Trivia"),
-                defaultArgument: InitializerClause(value: "nil")
-              ),
-            ]
-          ),
+          input: createFormatLeadingTriviaParameters(withDefaultTrivia: true),
           output: type.syntax
         )
       ) {
@@ -193,22 +178,7 @@ let buildableCollectionNodesFile = SourceFile {
         modifiers: [TokenSyntax.public],
         identifier: .identifier("buildSyntax"),
         signature: FunctionSignature(
-          input: ParameterClause(
-            parameterList: [
-              FunctionParameter(
-                firstName: .identifier("format"),
-                colon: .colon,
-                type: "Format",
-                trailingComma: .comma
-              ),
-              FunctionParameter(
-                firstName: .identifier("leadingTrivia"),
-                colon: .colon,
-                type: OptionalType(wrappedType: "Trivia"),
-                defaultArgument: InitializerClause(value: "nil")
-              ),
-            ]
-          ),
+          input: createFormatLeadingTriviaParameters(withDefaultTrivia: true),
           output: "Syntax"
         )
       ) {
