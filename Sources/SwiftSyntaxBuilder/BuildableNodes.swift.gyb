@@ -34,7 +34,7 @@ import SwiftSyntax
 public struct ${type.buildable()}${conformance_clause(conformances)} {
 %   children = node.children()
 %   for child in children:
-  let ${child.name()}: ${child.type().buildable()}
+  let ${child.name()}: ${child.buildable()}
 %   end
 
   /// The leading trivia attached to this syntax node once built.
@@ -50,7 +50,7 @@ public struct ${type.buildable()}${conformance_clause(conformances)} {
     leadingTrivia: Trivia = [],
     ${',\n    '.join(['%s: %s%s' % (
       child.name(),
-      child.type().expressible_as(),
+      child.expressible_as(),
       child.type().default_initialization()
     ) for child in children])}
   ) {
@@ -86,10 +86,16 @@ public struct ${type.buildable()}${conformance_clause(conformances)} {
         create_convenience_initializer = True
         if child.type().is_optional:
           param_type = 'String?'
-          produce_expr = '%s.map(TokenSyntax.%s)' % (child.name(), child.type().token().swift_kind())
+          if child.is_arbitrary_identifier():
+            produce_expr = '%s.map(IdentifierToken.init(_:))' % child.name()
+          else:
+            produce_expr = '%s.map(TokenSyntax.%s)' % (child.name(), child.type().token().swift_kind())
         else:
           param_type = 'String'
-          produce_expr = 'TokenSyntax.%s(%s)' % (child.type().token().swift_kind(), child.name())
+          if child.is_arbitrary_identifier():
+            produce_expr = 'IdentifierToken(%s)' % child.name()
+          else:
+            produce_expr = 'TokenSyntax.%s(%s)' % (child.type().token().swift_kind(), child.name())
         convenience_init_normal_parameters.append('%s: %s' % (child.name(), param_type))
       else:
         convenience_init_normal_parameters.append('%s: %s%s' % (child.name(), child.type().expressible_as(), child.type().default_initialization()))

@@ -23,16 +23,50 @@ class SyntaxBuildableChild:
     The type of this child, represented by a `SyntaxBuildableType`, which can be used to create the corresponding `Buildable` and `ExpressibleAs` types.
     """
     return SyntaxBuildableType(self.child.syntax_kind, self.child.is_optional)
+  
+  def is_arbitrary_identifier(self):
+    """
+    Whether this is an identifier without fixed text choices.
+    """
+    return self.type().token_kind == 'IdentifierToken' and not self.child.text_choices
+  
+  def expressible_as(self):
+    """
+    Return the `ExpressibleAs*` Swift type for this node's type. In contrast to `.type().expressible_as()`
+    this will return `IdentifierToken` for identifiers which can represent arbitrary text.
+    """
+    if self.type().is_token():
+      # Tokens don't have a dedicated ExpressibleAs type.
+      return self.buildable()
+    else:
+      return 'ExpressibleAs' + self.buildable()
+  
+  def buildable(self):
+    """
+    Return the name of the `Buildable` type that is the main entry point for building SwiftSyntax trees using `SwiftSyntaxBuilder`.
+    These names look as follows:
+     - For nodes: The node name, e.g. `IdentifierExpr` (these are implemented as structs)
+     - For base kinds: `<BaseKind>Buildable`, e.g. `ExprBuildable` (these are implemented as protocols)
+     - For (arbitrary) identifier tokens: `IdentifierToken`
+     - For tokens: `TokenSyntax` (other tokens don't have a dedicated type in SwiftSyntaxBuilder)
+    If the type is optional, this terminates with a '?'.
+    """
+    if self.is_arbitrary_identifier():
+      return 'IdentifierToken' + self.type().optional_question_mark()
+    else:
+      return self.type().buildable()
 
   def generate_expr_build_syntax_node(self, var_name, format_name):
     """
     Generate a Swift expression that creates a proper SwiftSyntax node of type `self.type().syntax()` from a variable named `var_name` of type `self.type().buildable()` that represents this child node.
     """
     if self.type().is_token():
-       if self.child.requires_leading_newline:
-         return var_name + '.withLeadingTrivia(.newline + ' + format_name + '._makeIndent() + (' + var_name + '.leadingTrivia ?? []))'
-       else:
-         return var_name
+      expr = var_name
+      if self.is_arbitrary_identifier():
+        expr += self.type().optional_question_mark() + '.token'
+      if self.child.requires_leading_newline:
+        expr += '.withLeadingTrivia(.newline + ' + format_name + '._makeIndent() + (' + var_name + '.leadingTrivia ?? []))'
+      return expr
     else:
       format = format_name
       if self.child.is_indented:
