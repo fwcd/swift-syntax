@@ -160,7 +160,7 @@ class SyntaxBuildableType:
            self.is_optional == other.is_optional and \
            self.token_kind == other.token_kind
 
-  def _optional_question_mark(self):
+  def optional_question_mark(self):
     if self.is_optional:
       return '?'
     else:
@@ -225,11 +225,11 @@ class SyntaxBuildableType:
     """
     if self.is_token():
       # Tokens don't have a dedicated buildable type.
-      return 'TokenSyntax' + self._optional_question_mark()
+      return 'TokenSyntax' + self.optional_question_mark()
     elif self.syntax_kind in SYNTAX_BASE_KINDS:
-      return self.syntax_kind + 'Buildable' + self._optional_question_mark()
+      return self.syntax_kind + 'Buildable' + self.optional_question_mark()
     else:
-      return self.syntax_kind + self._optional_question_mark()
+      return self.syntax_kind + self.optional_question_mark()
 
   def is_builder_initializable(self):
     """
@@ -272,22 +272,22 @@ class SyntaxBuildableType:
     If the type is optional, this terminates with a '?'.
     """
     if self.syntax_kind == 'Syntax':
-      return 'Syntax' + self._optional_question_mark()
+      return 'Syntax' + self.optional_question_mark()
     else:
-      return self.syntax_kind + 'Syntax' + self._optional_question_mark()
+      return self.syntax_kind + 'Syntax' + self.optional_question_mark()
 
   def list_buildable(self):
     """
     Assuming that this is a base kind, return the corresponding `*ListBuildable` type.
     """
     assert self.syntax_kind in SYNTAX_BASE_KINDS, "ListBuildable types only exist for syntax base kinds"
-    return self.syntax_kind + 'ListBuildable' + self._optional_question_mark()
+    return self.syntax_kind + 'ListBuildable' + self.optional_question_mark()
 
   def result_builder(self):
     """
     Assuming that this is a collection type, the type of the result builder that can be used to build the collection.
     """
-    return self.syntax_kind + 'Builder' + self._optional_question_mark()
+    return self.syntax_kind + 'Builder' + self.optional_question_mark()
 
   def element_in_collections(self):
     """
