@@ -96,6 +96,14 @@ public enum TokenKind {
 % end
     }
   }
+
+  /// Returns `true` if the token is a Swift identifier.
+  public var isIdentifier: Bool {
+    switch self {
+    case .identifier(_): return true
+    default: return false
+    }
+  }
   
   var kind: String {
     switch self {
