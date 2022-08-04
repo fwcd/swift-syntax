@@ -146,32 +146,33 @@ let buildableCollectionNodesFile = SourceFile {
             }
           }
         )
-        IfStmt(
-          conditions: OptionalBindingCondition(
-            letOrVarKeyword: .let,
-            pattern: "leadingTrivia",
-            initializer: "leadingTrivia"
-          )
-        ) {
-          ReturnStmt(expression: FunctionCallExpr(MemberAccessExpr(base: "result", name: "withLeadingTrivia")) {
-            TupleExprElement(expression: FunctionCallExpr(MemberAccessExpr(
-              base: SequenceExpr {
-                "leadingTrivia"
-                BinaryOperatorExpr("+")
-                TupleExpr {
-                  SequenceExpr {
-                    MemberAccessExpr(base: "result", name: "leadingTrivia")
-                    BinaryOperatorExpr("??")
-                    ArrayExpr(elements: [])
-                  }
-                }
-              },
-              name: "addingSpacingAfterNewlinesIfNeeded"
-            )))
-          })
-        } elseBody: {
-          ReturnStmt(expression: "result")
-        }
+        VariableDecl(
+          .let,
+          name: "combinedLeadingTrivia",
+          initializer: SequenceExpr {
+            TupleExpr {
+              SequenceExpr {
+                FunctionCallExpr(MemberAccessExpr(
+                  base: OptionalChainingExpr(expression: "leadingTrivia"),
+                  name: "addingSpacingAfterNewlinesIfNeeded"
+                ))
+                BinaryOperatorExpr("??")
+                ArrayExpr(elements: [])
+              }
+            }
+            BinaryOperatorExpr("+")
+            TupleExpr {
+              SequenceExpr {
+                MemberAccessExpr(base: "result", name: "leadingTrivia")
+                BinaryOperatorExpr("??")
+                ArrayExpr(elements: [])
+              }
+            }
+          }
+        )
+        ReturnStmt(expression: FunctionCallExpr(MemberAccessExpr(base: "result", name: "withLeadingTrivia")) {
+          TupleExprElement(expression: "combinedLeadingTrivia")
+        })
       }
 
       FunctionDecl(
